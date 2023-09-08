@@ -1,17 +1,38 @@
-import Image from "next/image";
-import Link from "next/link";
+"use client";
+
+import { useEffect, useState } from "react";
+import Courses from "./components/Courses";
+import LoadingPage from "./loading";
+import SearchBar from "./components/SearchBar";
 
 export default function Home() {
+  const [courses, setCourses] = useState([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setIsLoading(true);
+      const response = await fetch("/api/courses");
+      const data = await response.json();
+      setCourses(data);
+      setIsLoading(false);
+    };
+    fetchCourses();
+  }, []);
+
+  if (isLoading) {
+    return <LoadingPage />;
+  }
+
   return (
-    <div>
+    <>
       <h1>Welcome To Traversy Media</h1>
-      <ul>
-        <li>
-          <Link href="/">Home</Link>
-          <Link href="/about">About</Link>
-          <Link href="/about/team">Team</Link>
-        </li>
-      </ul>
-    </div>
+      <SearchBar
+        getSearchResult={(result) => {
+          setCourses(result);
+        }}
+      />
+      <Courses courses={courses} />
+    </>
   );
 }
